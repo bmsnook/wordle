@@ -508,9 +508,7 @@ function process_final(this) {
 ## INIT
 ## 
 BEGIN{
-#	WORD_LIST_FILE="wordle-list.txt"
-#	WORD_LIST_FILE="wordle-short.txt"
-	WORD_LIST_FILE="wordle-test.txt"
+	WORD_LIST_FILE="wordle-PLAY.txt"
 	VALID_WORDLIST="wordle-VALID.txt"
 
 	TPUT="/usr/bin/tput"
