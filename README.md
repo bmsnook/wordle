@@ -32,13 +32,13 @@ First, I generated a wordlist from the aspell dictionary on Linux. I can't claim
 
 [https://superuser.com/questions/137957/how-to-convert-aspell-dictionary-to-simple-list-of-words]
 
-I did write a script to massage the data to be usable for Wordle. Please see the script `mkwords.sh`
+I did write a script to massage the data to be usable for Wordle. Please see the script [`mkwords.sh`](https://github.com/bmsnook/wordle/blob/master/mkwords.sh)
 
 Second, I used the following page
 
 [https://www.pcmag.com/how-to/want-to-up-your-wordle-game-the-winning-word-is-right-on-the-page]
 
-for inspiration in finding the script page used to store the wordlists. I wrote an awk script to download and digest the wordlist in case it changes in the future. Please see the script `get_nyt_wordlists.awk`
+for inspiration in finding the script page used to store the wordlists. I wrote an awk script to download and digest the wordlist in case it changes in the future. Please see the script [`get_nyt_wordlists.awk`](https://github.com/bmsnook/wordle/blob/master/get_nyt_wordlists.awk)
 
 Feel free to edit or use your own wordlists!
 
