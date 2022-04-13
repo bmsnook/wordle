@@ -49,7 +49,7 @@ I realize the current notation for differentiating unguessed/wrong/misplaced/cor
 
 ## The Real Deal™
 
-Of course, for the real experience of Wordle, you should either check out the NYT version online
+Of course, for the real experience of Wordle, you should check out the NYT version online
 
 https://www.nytimes.com/games/wordle/index.html
 
