@@ -1,0 +1,10 @@
+FROM alpine:latest
+RUN apk add ncurses
+RUN apk add gawk
+RUN mkdir /wordle
+WORKDIR /wordle
+COPY wordlists/wordle-list_nyt_PLAY.txt /wordle/wordle-PLAY.txt
+COPY wordlists/wordle-list_nyt_VALID.txt /wordle/wordle-VALID.txt
+COPY wordle.awk /wordle/wordle.awk
+RUN chmod +x /wordle/wordle.awk
+ENTRYPOINT ["/wordle/wordle.awk"]
