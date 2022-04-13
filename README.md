@@ -8,7 +8,7 @@ git clone git@github.com:bmsnook/wordle.git
 cd wordle
 ```
 
-and run the program in Docker
+and then either run the program in Docker
 
 ```
 docker build -f Dockerfile-awk -t wordle-awk .
@@ -17,10 +17,14 @@ docker run -it wordle-awk
 
 or just run it at the command line
 
-`./wordle.awk`
+```
+./wordle.awk
+```
+
+*(The reason I use `Dockerfile-awk` is because I envision future versions in other languages and I don't know that I'd necessarily want to start them all at the same time, so I anticipate future use of `Dockerfile-python` and `Dockerfile-java`, for instance)*
 
 
-### NOTE:
+### NOTE on wordlists:
 
 I've generated/downloaded wordlists two different ways. Feel free to use the included wordlists (in the `wordlists` directory) or generate/find your own.
 
