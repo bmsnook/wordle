@@ -46,3 +46,11 @@ Feel free to edit or use your own wordlists!
 
 I realize the current notation for differentiating unguessed/wrong/misplaced/correct letters is somewhat abysmal. I've played around with using lowercase for unselected letters, but I didn't like it much better. Although I mostly wrote this as a scripting/programming exercise, and a framework to port over to Python for learning, I'm open to suggestions/feedback if anyone else actually finds and plays this.
 
+
+## The Real Deal™
+
+Of course, for the real experience of Wordle, you should either check out the NYT version online
+
+https://www.nytimes.com/games/wordle/index.html
+
+and/or download one of the multiple versions available on device app stores.
