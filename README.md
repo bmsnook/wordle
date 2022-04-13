@@ -3,13 +3,17 @@
 
 Download the repo
 
-```git clone git@github.com:bmsnook/wordle.git
-cd wordle```
+```
+git clone git@github.com:bmsnook/wordle.git
+cd wordle
+```
 
 and run the program in Docker
 
-```docker build -f Dockerfile-awk -t wordle-awk .
-docker run -it wordle-awk```
+```
+docker build -f Dockerfile-awk -t wordle-awk .
+docker run -it wordle-awk
+```
 
 or just run it at the command line
 
