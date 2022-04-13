@@ -29,9 +29,16 @@ function import_wordlist(WFILE) {
 }
 
 function get_term_width() {
-	cmd_cols=sprintf("%s cols",TPUT)
-	cmd_cols | getline WIDTH
-	close(cmd_cols)
+	verify_tput_cmd=sprintf("[ -x %s ]",TPUT)
+	tput_found_stat=system(verify_tput_cmd)
+	close(verify_tput_cmd)
+	if (tput_found_stat == 0) {
+		cmd_cols=sprintf("%s cols",TPUT)
+		cmd_cols | getline WIDTH
+		close(cmd_cols)
+	} else {
+		WIDTH=80
+	}
 	return WIDTH
 }
 
@@ -234,7 +241,7 @@ function register_solution() {
 }
 
 function print_stats() {
-	printf "Games Played: %6s      Games Solved: %6s      (%0.2f %%)\n", \
+	printf "Games Played: %6s      Games Solved: %6s      (%0.2f %%)\n\n", \
 		GAMES_PLAYED,GAMES_SOLVED,(GAMES_SOLVED/GAMES_PLAYED)*100
 	printf "Distribution of steps needed for solution:\n"
 	for (i=1; i<=6; i++) {
@@ -248,6 +255,7 @@ function print_stats() {
 #		printf "%s=%s (%0.2f%%)  ",i,SOLVED_MOVES[i],ratio
 		printf "%s:%s (%0s%%)  ",i,SOLVED_MOVES[i],ratio
 	}
+	printf "\n"
 	printf "\n"
 }
 
