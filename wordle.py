@@ -100,19 +100,128 @@ def get_term_width():
 
 def print_justified(array_of_lines):
 	max_line_length=0
+	NL=len(array_of_lines)
 	for each in array_of_lines:
-		if length(each) > max_line_length:
-			max_line_length = length(each)
+		if len(each) > max_line_length:
+			max_line_length = len(each)
 	WD=get_term_width()
 	SZ=int(WD/max_line_length)
 	for i in array_of_lines:
-		for j in range(1,length(array_of_lines[i])):
+		for j in range(1,len(array_of_lines[i])):
 			print("{0:SZ}".format("x"), end='')
+		print("")
+
+def print_center_justified(array_of_lines):
+	max_line_length = 0
+	NL = len(array_of_lines)
+	for i in range(1,NL):
+		if len(array_of_lines[i]) > max_line_length:
+			max_line_length = len(array_of_lines[i])
+	WD=get_term_width
+	MARGIN=int((WD - max_line_length)/2)
+	for i in range(1,NL):
+		for j in range(1,MARGIN):
+			print(" ", end='')
+		print("{}".format(array_of_lines[i]))
+
+def print_centered(array_of_lines):
+	WD=get_term_width()
+	NL=len(array_of_lines)
+	for i in range(1,NL):
+		LILEN = len(array_of_lines[i])
+		MARGIN = int((WD - LILEN)/2)
+		for j in range(1,MARGIN):
+			print(" ", end='')
+		print("{}".format(array_of_lines[i]))
+
+def formatted_letter(letter):
+	global CORRECT_ARRAY
+	if CORRECT_ARRAY[letter]:
+		val = correct_tag(letter)
+	elif MISPLACED_LETTER[letter]:
+		val = misplaced_tag(letter)
+	elif WRONG_ARRAY[letter]:
+		val = wrong_tag(letter)
+	else:
+		val = basic_tag(letter)
+	return val
+
+def map_letters(letter_array):
+	global KEY_LD
+	global KEY_RD
+	global KSEP
+	global LETTER_STATUS
+	for i in range(1, len(letter_array)):
+		line=""
+		num_per_line = split(letter_array[i], LA, "")	## CONVERT FROM AWK
+		for j in range (0, num_per_line-2):
+			val = formatted_letter(LA[j])
+			line = line + KEY_LD + val + KEY_RD + KSEP
+		val = formatted_letter(LA[num_per_line-1])
+		line = line + KEY_LD + val + KEY_RD
+		LETTER_STATUS[i] = line
+
+def print_letters():
+	if USE_KEYBOARD:
+		LETTER_FORMAT = map_letters(KEYBOARD)
+	else:
+		LETTER_FORMAT = map_letters(ALPHABET)
+	if CENTER:
+		print_centered(LETTER_STATUS)
+	else:
+		print_center_justified(LETTER_STATUS)
+
+def print_keyboard():
+	print_justified(KEYBOARD)
+
+def print_alpha():
+	print_justified(ALPHABET)
+
+def print_guide():
+	print("GUIDE:")
+	print("  [%s]  ==  CORRECT letter".format(correct_tag("a")))
+	print("  [%s]  ==  Misplaced letter (elsewhere in puzzle)".format(misplaced_tag("a")))
+	print("  [%s]  ==  Wrong letter (not in puzzle)".format(wrong_tag("a")))
+	print("  [%s]  ==  Untried letter".format(basic_tag("a")))
 	print("")
+
+def print_usage():
+	print("NOTE: only as many letters as occur will be marked misplaced;")
+	print("      additional instances will be marked wrong")
+	print("")
+
+def print_post_help():
+	print("OPTIONS:")
+	print("  0 == Quit")
+	print("  1 == Use QWERTY mapping for used letters status (DEFAULT)")
+	print("  2 == Use ALPHABETIC mapping for used letters status")
+	print("  3 == Toggle pre-board wordlist info and guide")
+	print("  8 == Toggle centered and justified display")
+	print("  9 == Toggle DEBUG mode (caution: reveals word pick)")
+	print("")
+	HELP  = False
+	GUIDE = True
+
+def clear():
+	os.system(CLEAR)
+
+def pick_word(WORD_ARRAY):
+	wordcount = len(WORD_ARRAY)
+	rand_pick = random.randint(0, wordcount-1)
+	picked_word = WORD_ARRAY[rand_pick]
+	return picked_word
+	
+def init_pick_tracking():
+	NUM_GUESSES=0
+	for i in range(97, 123):
+		## guessing python has another way to iterate through the alphabet
+		letter = "something something with " + i
 
 ## 
 ## initialization
 ## 
+clear()
+
 random.seed()
 
 import_validwords(VALID_WORDLIST)
@@ -150,3 +259,4 @@ print("There are {} words in WORD_LIST_FILE)".format(len(WORD_LIST_FILE)))
 #else:
 #	print(f"Could NOT find \"{rr}\"")
 
+print("I picked a word: {}".format(pick_word(WORDS)))
