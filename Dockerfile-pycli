@@ -1,10 +1,10 @@
 FROM alpine:latest
 RUN apk add ncurses
-RUN apk add gawk
+RUN apk add python3
 RUN mkdir /wordle
 WORKDIR /wordle
 COPY wordle.lists.d/wordle-list_nyt_PLAY.txt /wordle/wordle-PLAY.txt
 COPY wordle.lists.d/wordle-list_nyt_VALID.txt /wordle/wordle-VALID.txt
-COPY wordle.awk /wordle/wordle.awk
-RUN chmod +x /wordle/wordle.awk
-ENTRYPOINT ["/wordle/wordle.awk"]
+COPY wordle.py /wordle/wordle.py
+RUN chmod +x /wordle/wordle.py
+ENTRYPOINT ["/wordle/wordle.py"]

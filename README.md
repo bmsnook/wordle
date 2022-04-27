@@ -14,11 +14,20 @@ and then either run the program in Docker
 docker build -f Dockerfile-awk -t wordle-awk .
 docker run -it wordle-awk
 ```
+or 
+```
+docker build -f Dockerfile-pycli -t wordle-pycli .
+docker run -it wordle-pycli
+```
 
 or just run it at the command line
 
 ```
 ./wordle.awk
+```
+or 
+```
+./wordle.py
 ```
 
 *(The reason I use `Dockerfile-awk` is because I envision future versions in other languages and I don't know that I'd necessarily want to start them all at the same time, so I anticipate future use of `Dockerfile-python` and `Dockerfile-java`, for instance)*

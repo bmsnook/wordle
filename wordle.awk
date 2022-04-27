@@ -42,7 +42,7 @@ function get_term_width() {
 	return WIDTH
 }
 
-function print_justified(array_of_lines) {
+function print_left_justified(array_of_lines) {
 	max_line_length=0
 	NL=length(array_of_lines)
 	for (i=1; i<=NL; i++){
@@ -145,11 +145,11 @@ function print_letters() {
 }
 
 function print_keyboard() {
-	print_justified(KEYBOARD)
+	print_left_justified(KEYBOARD)
 }
 
 function print_alpha() {
-	print_justified(ALPHABET)
+	print_left_justified(ALPHABET)
 }
 
 function print_guide() {
@@ -263,12 +263,12 @@ function init_this_guess_tracking() {
 	CORRECT_THIS_LINE=0
 	for (i=1; i<=5; i++) {
 		CURRENT_GUESS_ARRAY[i]=blank_tag()
-		for (i=97; i<123; i++) {
-				letter=sprintf("%c",i)
-				CORRECT_TO_LABEL[letter]=0
-				OCCUR_TO_LABEL[letter]=0
-				LABELED_MISPLACED[letter]=0
-		}
+	}
+	for (i=97; i<123; i++) {
+		letter=sprintf("%c",i)
+		CORRECT_TO_LABEL[letter]=0
+		OCCUR_TO_LABEL[letter]=0
+		LABELED_MISPLACED[letter]=0
 	}
 }
 
@@ -457,8 +457,6 @@ function evaluate_guess(guess) {
 }
 
 function print_guesses() {
-#	len_guess=length(ALL_GUESSES_FORMATTED[1])
-#	print_centered(ALL_GUESSES_FORMATTED,len_guess)
 	print_centered(ALL_GUESSES_FORMATTED)
 }
 
@@ -570,7 +568,7 @@ BEGIN{
 END{
 	init_seed()
 	if (max > 0) {
-		print_justified(lines)
+		print_left_justified(lines)
 	}
 	while (PLAYING) {
 		printf "Playing with %s words acceptable to guess.\n",VALID_COUNT
