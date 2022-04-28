@@ -336,7 +336,7 @@ def set_options(raw):
 		else:
 			DEBUG = True
 	else:
-		nothing = "donothing"
+		pass
 
 def disable_usage():
 	global USAGE
