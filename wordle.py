@@ -2,7 +2,6 @@
 
 import os
 import re
-#import sys
 import random
 import string
 
@@ -114,15 +113,9 @@ def get_term_width():
 	verify_tput_cmd="[ -x " + TPUT + " ]"
 	get_cols_cmd=TPUT + " cols"
 	tput_found_stat = os.system(verify_tput_cmd)
-	if DEBUG2:
-		print("DEBUG: get_term_width: verify_tput_cmd = {}".format(verify_tput_cmd))
-		print("DEBUG: get_term_width: get_cols_cmd = {}".format(get_cols_cmd))
-		print("DEBUG: get_term_width: tput_found_stat = {}".format(tput_found_stat))
 	if tput_found_stat == 0:
 		tput_cols_process = os.popen(get_cols_cmd)
 		WIDTH = int(tput_cols_process.read().rstrip())
-		if DEBUG2:
-			print("DEBUG: get_term_width: WIDTH         = \"{}\"".format(WIDTH))
 	else:
 		WIDTH = 80
 	return WIDTH
@@ -428,12 +421,6 @@ def register_pick(pick):
 	NUM_GUESSES = 0
 	for letter in pick:
 		PICK_LETTER_COUNT[letter] += 1
-		if DEBUG:
-			print("DEBUG: (register_pick): Processing letter '{}' of pick '{}'".format(letter,pick))
-			print("DEBUG: (register_pick): Current value of PICK_LETTER_COUNT is:")
-			print(PICK_LETTER_COUNT)
-			print("DEBUG: (register_pick): Current value of PICK_LETTER_COUNT[{}] is '{}'"\
-					.format(letter,PICK_LETTER_COUNT[letter]))
 
 def evaluate_guess(guess):
 	global CURRENT_WORD
@@ -458,11 +445,6 @@ def evaluate_guess(guess):
 		if CURRENT_WORD[i] == letter:
 			CORRECT_TO_LABEL[letter] += 1
 			CORRECT_THIS_LINE += 1
-			if DEBUG:
-				print("DEBUG: (evaluate_guess): position[{}] :: '{}' == '{}'"\
-						.format(i,CURRENT_WORD[i],guess[i]))
-				print("DEBUG: (evaluate_guess): CORRECT_THIS_LINE = '{}'"\
-						.format(CORRECT_THIS_LINE))
 		OCCUR_TO_LABEL[letter] += 1
 	## Step through 2/2 times to format letters
 	for i in range(0,5):
@@ -485,14 +467,8 @@ def evaluate_guess(guess):
 			current_guess_line_array[i] = wrong_tag(letter)
 	guess_string = guess_line_array_to_string(current_guess_line_array)
 	add_guess_line_to_board(guess_string, NUM_GUESSES)
-	if DEBUG:
-		print("DEBUG: (evaluate_guess)1: CORRECT_THIS_LINE = '{}' :: SOLVED = '{}'"\
-				.format(CORRECT_THIS_LINE, SOLVED))
 	if CORRECT_THIS_LINE == 5:
 		SOLVED = True
-		if DEBUG:
-			print("DEBUG: (evaluate_guess)2: CORRECT_THIS_LINE = '{}' :: SOLVED = '{}'"\
-					.format(CORRECT_THIS_LINE, SOLVED))
 	NUM_GUESSES += 1
 	return 1
 
