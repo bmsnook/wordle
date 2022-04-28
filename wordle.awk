@@ -144,12 +144,8 @@ function print_letters() {
 	}
 }
 
-function print_keyboard() {
-	print_left_justified(KEYBOARD)
-}
-
-function print_alpha() {
-	print_left_justified(ALPHABET)
+function print_title() {
+	print_centered(TITLE)
 }
 
 function print_guide() {
@@ -161,12 +157,10 @@ function print_guide() {
 	printf "\n"
 }
 function print_usage() {
-	printf "NOTE: only as many letters as occur will be marked misplaced;\n"
-	printf "      additional instances will be marked wrong\n"
-	printf "\n"
+	print_center_justified(USAGE_TEXT)
 }
 
-function print_post_help() {
+function print_options() {
 	printf "OPTIONS:\n"
 	printf "  0 == Quit\n"
 	printf "  1 == Use QWERTY mapping for used letters status (DEFAULT)\n"
@@ -175,8 +169,8 @@ function print_post_help() {
 	printf "  8 == Toggle centered and justified display\n"
 	printf "  9 == Toggle DEBUG mode (caution: reveals word pick)\n"
 	printf "\n"
-	HELP=0
-	GUIDE=1
+	disable_options()
+	enable_guide()
 }
 
 function clear() {
@@ -236,7 +230,7 @@ function register_solution() {
 	if (SOLVED) {
 		GAMES_SOLVED++
 		SOLVED_MOVES[NUM_GUESSES]++
-		SOLVED=0
+		disable_set_solved()
 	}
 }
 
@@ -281,26 +275,26 @@ function init_letters_in_current_guess() {
 
 function set_options(this) {
 	if (this == 1) {
-		USE_KEYBOARD=1
+		enable_keyboard_letter_ordering()
 	} else if (this == 2) {
-		USE_KEYBOARD=0
+		disable_keyboard_letter_ordering()
 	} else if (this == 3) {
 		if (GUIDE) {
-			GUIDE=0
+			disable_guide()
 		} else {
-			GUIDE=1
+			enable_guide()
 		}
 	} else if (this == 8) {
 		if (CENTER) {
-			CENTER=0
+			disable_centered_layout()
 		} else {
-			CENTER=1
+			enable_centered_layout()
 		}
 	} else if (this == 9) {
 		if (DEBUG) {
-			DEBUG=0
+			disable_debug()
 		} else {
-			DEBUG=1
+			enable_debug()
 		}
 	} else {
 		## do nothing
@@ -319,6 +313,44 @@ function disable_guide() {
 }
 function enable_guide() {
 	GUIDE=1
+}
+
+function disable_options() {
+	OPTIONS=0
+}
+
+function enable_options() {
+	OPTIONS=1
+}
+
+function disable_centered_layout() {
+	CENTER=0
+}
+function enable_centered_layout() {
+	CENTER=1
+}
+function disable_keyboard_letter_ordering() {
+	USE_KEYBOARD=0
+}
+function enable_keyboard_letter_ordering() {
+	USE_KEYBOARD=1
+}
+function disable_debug() {
+	DEBUG=0
+}
+function enable_debug() {
+	DEBUG=1
+}
+
+function disable_set_solved() {
+	SOLVED=0
+}
+function enable_set_solved() {
+	SOLVED=1
+}
+
+function disable_playing() {
+	PLAYING=0
 }
 
 function guess_line_array_to_string(array) {
@@ -451,7 +483,7 @@ function evaluate_guess(guess) {
 	guess_string=guess_line_array_to_string(curr_guess_line_array)
 	add_guess_line_to_board(guess_string, NUM_GUESSES)
 	if (CORRECT_THIS_LINE == 5) {
-		SOLVED=1
+		enable_set_solved()
 	}
 	return 1
 }
@@ -460,14 +492,25 @@ function print_guesses() {
 	print_centered(ALL_GUESSES_FORMATTED)
 }
 
+function print_wordlist_stats() {
+	printf "Playing with %s words acceptable to guess.\n",VALID_COUNT
+	printf "Playing with %s words.\n\n",WCOUNT
+}
+
 function print_board() {
 	if ( !(DEBUG) ) { clear() }
+	print_title()
+	if ( OPTIONS ) { disable_guide() }
 	if ( GUIDE ) { print_guide() }
-	if ( USAGE ) { print_usage() }
 	print_guesses()
 	printf "\n"
 	print_letters()
 	printf "\n"
+	if ( OPTIONS ) {
+		print_options()
+		enable_guide()
+	}
+	if ( USAGE ) { print_usage() }
 }
 
 function prompt_user() {
@@ -479,13 +522,13 @@ function prompt_user() {
 
 function process_response(this) {
 	if (this == 0) {
-		PLAYING=0
+		disable_playing()
 		exit 0
 	} else if (this ~ /^[1-9]$/) {
 		set_options(this)
 	} else if (this == "?") {
-		HELP=1
-		GUIDE=0
+		enable_options()
+		disable_guide()
 	} else if (this ~ /[a-z][a-z][a-z][a-z][a-z]/) {
 		evaluate_guess(this)
 	}
@@ -493,13 +536,13 @@ function process_response(this) {
 
 function process_final(this) {
 	if (this == 0) {
-		PLAYING=0
+		disable_playing()
 		exit 0
 	} else if (this ~ /^[1-9]$/) {
 		set_options(this)
 	} else if (this == "?") {
-		HELP=1
-		GUIDE=0
+		enable_options()
+		disable_guide()
 	}
 }
 
@@ -512,6 +555,8 @@ BEGIN{
 	TPUT="/usr/bin/tput"
 	CLEAR="clear"
 
+	TITLE[1]="Wordle (AWK CLI)"
+	USAGE_TEXT[1]="NOTE: misplaced # reflects occurrences; extras are marked wrong"
 	## AWK :: 0 == false, 1 == true
 	DEBUG=0
 	DEBUG2=0
@@ -521,16 +566,16 @@ BEGIN{
 	DEFAULT_SEED=23
 	GAMES_PLAYED=0
 	GAMES_SOLVED=0
-	## Print Centered (1) or Center-Justified (0) (DEFAULT)
+	## Display letter key Centered (1=True) or Center-Justified (0=False) (DEFAULT)
 	CENTER=0
+	## Display guide to correct, misplaced, wrong, unchosen letters
 	GUIDE=1
+	## Display usage hint (currently regarding # of misplaced letters)
 	USAGE=1
-	## Display post-board/pre-prompt help: 0=NO,1=YES
-	HELP=0
-	## Either print QWERTY (1) or ALPHABETIC (0)
+	## Display configuration options
+	OPTIONS=0
+	## Either print key QWERTY (1=True)(DEFAULT) or ALPHABETIC (0=False)
 	USE_KEYBOARD=1
-
-	split("abcdefghijklmnopqrstuvwxyz", A, "")
 
 	KEYBOARD[1]="qwertyuiop"
 	KEYBOARD[2]="asdfghjkl"
@@ -571,19 +616,13 @@ END{
 		print_left_justified(lines)
 	}
 	while (PLAYING) {
-		printf "Playing with %s words acceptable to guess.\n",VALID_COUNT
-		printf "Playing with %s words.\n\n",WCOUNT
 		init_letters_in_current_guess()
+		disable_usage()
 		CURRENT_WORD=pick_word(WORDS)
+		if (DEBUG) { printf "DEBUG: Picked word: \"%s\"\n",CURRENT_WORD }
 		register_pick(CURRENT_WORD)
 		while ( PLAYING && (NUM_GUESSES < 6) && !(SOLVED) ) {
 			print_board()
-			if (DEBUG) {
-				printf "DEBUG: (END): Using seed \"%s\"\n",SEED
-				printf "DEBUG: (END): I picked word \"%s\"\n",CURRENT_WORD
-				printf "DEBUG: (END): The 8th word is \"%s\"\n",WORDS[8]
-			}  ## END DEBUG
-			if (HELP) { print_post_help() }
 			process_response(tolower(prompt_user()))
 		}
 		GAMES_PLAYED++
@@ -596,7 +635,7 @@ END{
 		} else if (NUM_GUESSES == 6) {
 			disable_guide()
 			print_board()
-			printf "Puzzle not solved in 6 guesses. Reveal word [[n]|y]? "
+			printf "Puzzle not solved in 6 guesses. Reveal word [N|y]? "
 			getline
 			if ($0 ~ /^[Yy]/) {
 				printf "The word was \"%s\". Play again?\n",CURRENT_WORD
