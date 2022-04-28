@@ -49,14 +49,15 @@ DEBUG2		= False
 STATS		= False
 PLAYING		= True
 SOLVED		= False
-## Print Centered (1) or Center-Justified (0) (DEFAULT)
+## Display letter key Centered (True) or Center-Justified (False) (DEFAULT)
 CENTER		= False
+## Display guide to correct, misplaced, wrong, unchosen letters
 GUIDE		= True
+## Display usage hint (currently regarding # of misplaced letters)
 USAGE		= True
-## Display post-board/pre-prompt help: 0=NO,1=YES
-HELP		= False
+## Display configuration options
 OPTIONS		= False
-## Either print QWERTY (True) or ALPHABETIC (False)
+## Either print key QWERTY (True) or ALPHABETIC (False)
 USE_KEYBOARD= True
 
 ## Initialize default counts and values
@@ -265,7 +266,7 @@ def register_solution():
 	if SOLVED:
 		GAMES_SOLVED += 1
 		SOLVED_MOVES[NUM_GUESSES] += 1
-		SOLVED = False
+		disable_set_solved()
 
 def print_stats():
 	global SOLVED_RATIO
@@ -309,24 +310,24 @@ def set_options(raw):
 	global CENTER
 	global DEBUG
 	if this == 1:
-		USE_KEYBOARD = True
+		enable_keyboard_letter_ordering()
 	elif this == 2:
-		USE_KEYBOARD = False
+		disable_keyboard_letter_ordering()
 	elif this == 3:
 		if GUIDE:
-			GUIDE = False
+			disable_guide()
 		else:
-			GUIDE = True
+			enable_guide()
 	elif this == 8:
 		if CENTER:
-			CENTER = False
+			disable_centered_layout()
 		else:
-			CENTER = True
+			enable_centered_layout()
 	elif this == 9:
 		if DEBUG:
-			DEBUG = False
+			disable_debug()
 		else:
-			DEBUG = True
+			enable_debug()
 	else:
 		pass
 
@@ -346,14 +347,6 @@ def enable_guide():
 	global GUIDE
 	GUIDE = True
 
-def disable_help():
-	global HELP
-	HELP = False
-
-def enable_help():
-	global HELP
-	HELP = True
-
 def disable_options():
 	global OPTIONS
 	OPTIONS = False
@@ -362,6 +355,41 @@ def enable_options():
 	global OPTIONS
 	OPTIONS = True
 
+def disable_centered_layout():
+	global CENTER
+	CENTER = False
+
+def enable_centered_layout():
+	global CENTER
+	CENTER = True
+
+def disable_keyboard_letter_ordering():
+	global USE_KEYBOARD
+	USE_KEYBOARD = False
+
+def enable_keyboard_letter_ordering():
+	global USE_KEYBOARD
+	USE_KEYBOARD = True
+
+def disable_debug():
+	global DEBUG
+	DEBUG = False
+
+def enable_debug():
+	global DEBUG
+	DEBUG = True
+
+def disable_set_solved():
+	global SOLVED
+	SOLVED = False
+
+def enable_set_solved():
+	global SOLVED
+	SOLVED = True
+
+def disable_playing():
+	global PLAYING
+	PLAYING = False
 
 def guess_line_array_to_string(array):
 	gstring=""
@@ -467,12 +495,16 @@ def evaluate_guess(guess):
 	guess_string = guess_line_array_to_string(current_guess_line_array)
 	add_guess_line_to_board(guess_string, NUM_GUESSES)
 	if CORRECT_THIS_LINE == 5:
-		SOLVED = True
+		enable_set_solved()
 	NUM_GUESSES += 1
 	return 1
 
 def print_guesses():
 	print_centered(ALL_GUESSES_FORMATTED)
+
+def print_wordlist_stats():
+	print("Playing with {} words acceptable to guess.".format(VALID_COUNT))
+	print("Playing with {} words.".format(WCOUNT))
 
 def print_board():
 	if not DEBUG:
@@ -498,14 +530,13 @@ def prompt_user():
 
 def process_response(this):
 	global PLAYING
-	global HELP
 	global GUIDE
 	if DEBUG:
 		print("DEBUG: (process_response): reponse == '{}'".format(this))
 	looksLikeOption = re.compile("^[1-9]$")
 	looksLikeWord = re.compile("^[a-z][a-z][a-z][a-z][a-z]$")
 	if this == "0":
-		PLAYING = False
+		disable_playing()
 		if DEBUG1:
 			print("DEBUG: (process_response): input = '{}'".format(this))
 			print("DEBUG: (process_response): PLAYING = '{}'".format(PLAYING))
@@ -523,7 +554,7 @@ def process_final(this):
 	looksLikeOption = re.compile("^[1-9]$")
 	looksLikeWord = re.compile("^[a-z][a-z][a-z][a-z][a-z]$")
 	if this == "0":
-		PLAYING = False
+		disable_playing()
 		exit()
 	elif looksLikeOption.match(this):
 		set_options(this)
