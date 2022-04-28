@@ -19,7 +19,7 @@ VALID_WORDLIST="wordle-VALID.txt"
 
 VALID_WORDS	= []
 WORDS		= []
-USAGE_TEXT	= []
+USAGE_TEXT	= ["NOTE: misplaced # reflects occurrences; extras are marked wrong"]
 SOLVED_MOVES		= {}
 COUNT_LINE_GUESS	= {}
 PICK_LETTER_COUNT	= {}
@@ -209,7 +209,6 @@ def print_guide():
 
 def print_usage():
 	global USAGE_TEXT
-	USAGE_TEXT = ["NOTE: misplaced # reflects occurrences; extras are marked wrong"]
 	print_center_justified(USAGE_TEXT)
 
 def print_options():
