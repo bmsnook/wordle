@@ -14,8 +14,6 @@ CLEAR="clear"
 
 WORD_LIST_FILE="wordle-PLAY.txt"
 VALID_WORDLIST="wordle-VALID.txt"
-#WORD_LIST_FILE="list_A.txt"
-#VALID_WORDLIST="list_B.txt"
 
 VALID_WORDS	= []
 WORDS		= []
