@@ -367,27 +367,27 @@ function add_guess_line_to_board(line_string, guess_number) {
 }
 
 function correct_tag(letter) {
-	formatted=sprintf("_%s_",toupper(letter))
+	formatted=sprintf("%s%s%s",CORRECT_TAG_DELIM,toupper(letter),CORRECT_TAG_DELIM)
 	return formatted
 }
 
 function misplaced_tag(letter) {
-	formatted=sprintf("-%s-",toupper(letter))
+	formatted=sprintf("%s%s%s",MISPLACED_TAG_DELIM,toupper(letter),MISPLACED_TAG_DELIM)
 	return formatted
 }
 
 function wrong_tag(letter) {
-	formatted=sprintf("*%s*",toupper(letter))
+	formatted=sprintf("%s%s%s",WRONG_TAG_DELIM,toupper(letter),WRONG_TAG_DELIM)
 	return formatted
 }
 
 function basic_tag(letter) {
-	formatted=sprintf(" %s ",toupper(letter))
+	formatted=sprintf("%s%s%s",BASIC_TAG_DELIM,toupper(letter),BASIC_TAG_DELIM)
 	return formatted
 }
 
 function blank_tag() {
-	formatted=sprintf("   ")
+	formatted=sprintf("%s %s",BLANK_TAG_DELIM,BLANK_TAG_DELIM)
 	return formatted
 }
 
@@ -408,6 +408,7 @@ function mark_wrong(letter) {
 }
 
 function register_pick(pick) {
+	NUM_GUESSES=0
 	split(pick,pick_as_array,"")
 	for (i=1; i<=5; i++) {
 		letter=pick_as_array[i]
@@ -453,7 +454,6 @@ function evaluate_guess(guess) {
 			}										## IN DEBUG
 		}											## IN DEBUG
 	}	## END DEBUG
-	## ZZZ
 	## 
 	## Step 2/2 through the guess to format letters
 	## 
@@ -463,24 +463,25 @@ function evaluate_guess(guess) {
 			if (pick_as_array[i] == guess_as_array[i]) {
 				mark_correct(letter)
 				unmark_misplaced(letter)
-				curr_guess_line_array[i]=correct_tag(letter)
+				current_guess_line_array[i]=correct_tag(letter)
 			}
 			else if ( (LABELED_MISPLACED[letter] + CORRECT_TO_LABEL[letter] + 1 )\
 							<= ( PICK_LETTER_COUNT[letter] ) ) {
 				mark_misplaced(letter)
-				curr_guess_line_array[i]=misplaced_tag(letter)
+				current_guess_line_array[i]=misplaced_tag(letter)
 				LABELED_MISPLACED[letter]++
+				enable_usage()
 			}
 			else {
-				curr_guess_line_array[i]=wrong_tag(letter)
+				current_guess_line_array[i]=wrong_tag(letter)
 			}
 		}
 		else {
 			mark_wrong(letter)
-			curr_guess_line_array[i]=wrong_tag(letter)
+			current_guess_line_array[i]=wrong_tag(letter)
 		}
 	}
-	guess_string=guess_line_array_to_string(curr_guess_line_array)
+	guess_string=guess_line_array_to_string(current_guess_line_array)
 	add_guess_line_to_board(guess_string, NUM_GUESSES)
 	if (CORRECT_THIS_LINE == 5) {
 		enable_set_solved()
@@ -591,6 +592,12 @@ BEGIN{
 	KEY_LD="["
 	KEY_RD="]"
 	KSEP="  "
+	CORRECT_TAG_DELIM	= "_"
+	MISPLACED_TAG_DELIM	= "-"
+	WRONG_TAG_DELIM		= "*"
+	BASIC_TAG_DELIM		= " "
+	BLANK_TAG_DELIM		= " "
+
 
 	import_validwords(VALID_WORDLIST)
 	import_wordlist(WORD_LIST_FILE)
