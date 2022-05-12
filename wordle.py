@@ -9,7 +9,6 @@ import string
 ## global constants, variables, lists, etc.
 ## 
 
-TPUT="/usr/bin/tput"
 CLEAR="clear"
 
 WORD_LIST_FILE="wordle-PLAY.txt"
@@ -109,15 +108,7 @@ def import_wordlist(WFILE):
 	f.close()
 
 def get_term_width():
-	verify_tput_cmd="[ -x " + TPUT + " ]"
-	get_cols_cmd=TPUT + " cols"
-	tput_found_stat = os.system(verify_tput_cmd)
-	if tput_found_stat == 0:
-		tput_cols_process = os.popen(get_cols_cmd)
-		WIDTH = int(tput_cols_process.read().rstrip())
-	else:
-		WIDTH = 80
-	return WIDTH
+	return os.get_terminal_size().columns
 
 #def print_left_justified(array_of_lines):
 #	max_line_length=0
