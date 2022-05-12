@@ -1,5 +1,4 @@
 FROM alpine:latest
-RUN apk add ncurses
 RUN apk add python3
 RUN mkdir /wordle
 WORKDIR /wordle
