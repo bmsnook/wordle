@@ -32,6 +32,15 @@ or
 
 *(The reason I use `Dockerfile-awk` is because I envision future versions in other languages and I don't know that I'd necessarily want to start them all at the same time, so I anticipate future use of `Dockerfile-python` and `Dockerfile-java`, for instance)*
 
+### NOTE on building behind corporate firewalls/filters that use MITM to examine SSL/TLS traffic:
+
+If you receive an error while building to the effect of "site couldn't be verified", you likely have a MITM device decrypting outbound traffic and it is returning a certificate path that the Docker container doesn't recognize. The workaround is to copy the local cacerts file your browser uses to recognize internal/corporate sites to `LOCAL-CACERTS.pem` and then use the file `Dockerfile-awk-MITM` instead of `Dockerfile-awk` to build (actually, the MITM file should work for either use case, since it uses a wildcard to copy the file and will silently fail if the file is not found locally, but I didn't want to clutter the file for basic use cases).
+
+For example:
+```
+docker build -f Dockerfile-awk-MITM -t wordle-awk .
+docker run -it wordle-awk
+```
 
 ### NOTE on wordlists:
 

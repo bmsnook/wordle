@@ -1,0 +1,17 @@
+FROM alpine:latest
+COPY LOCAL-CACERTS.pem* /etc/ssl/certs/
+RUN ( [[ -f /etc/ssl/certs/LOCAL-CACERTS.pem ]] && \
+    cat /etc/ssl/certs/LOCAL-CACERTS.pem >> /etc/ssl/certs/ca-certificates.crt && \
+    apk --no-cache add ca-certificates && rm -rf /var/cache/apk/* && \
+    cp -p /etc/ssl/certs/LOCAL-CACERTS.pem /usr/local/share/ca-certificates/ && \
+    update-ca-certificates || return 0 )
+RUN ( apk add ncurses && \
+      apk add gawk ) || \
+    ( >&2 echo "ERROR: apk probably had SSL errors; add your local cacerts to LOCAL-CACERTS.pem" && return 1 )
+RUN mkdir /wordle
+WORKDIR /wordle
+COPY wordle.lists.d/wordle-list_nyt_PLAY.txt /wordle/wordle-PLAY.txt
+COPY wordle.lists.d/wordle-list_nyt_VALID.txt /wordle/wordle-VALID.txt
+COPY wordle.awk /wordle/wordle.awk
+RUN chmod +x /wordle/wordle.awk
+ENTRYPOINT ["/wordle/wordle.awk"]
