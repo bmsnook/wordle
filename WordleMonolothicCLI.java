@@ -118,18 +118,18 @@ def import_wordlist(WFILE):
 def get_term_width():
     return os.get_terminal_size().columns
 
-#def print_left_justified(array_of_lines):
-#   max_line_length=0
-#   NL=len(array_of_lines)
-#   for each in array_of_lines:
-#       if len(each) > max_line_length:
-#           max_line_length = len(each)
-#   termWidth = get_term_width()
-#   SZ=int( termWidth / max_line_length )
-#   for i in array_of_lines:
-#       for j in range(0,len(array_of_lines[i])):
-#           print("{0:SZ}".format(array_of_lines[i][j]), end='')
-#       print("")
+//def print_left_justified(array_of_lines):
+//   max_line_length=0
+//   NL=len(array_of_lines)
+//   for each in array_of_lines:
+//       if len(each) > max_line_length:
+//           max_line_length = len(each)
+//   termWidth = get_term_width()
+//   SZ=int( termWidth / max_line_length )
+//   for i in array_of_lines:
+//       for j in range(0,len(array_of_lines[i])):
+//           print("{0:SZ}".format(array_of_lines[i][j]), end='')
+//       print("")
 
 def print_center_justified(array_of_lines):
     max_line_length = 0
@@ -473,7 +473,7 @@ def evaluate_guess(guess):
     if ( not (guess in VALID_WORDS) ):
         return 0
     init_this_guess_tracking()
-    ## Step through 1/2 times to count matches
+    // Step through 1/2 times to count matches
     for i in range(0,5):
         letter = guess[i]
         COUNT_LINE_GUESS[letter] += 1
@@ -481,7 +481,7 @@ def evaluate_guess(guess):
             CORRECT_TO_LABEL[letter] += 1
             CORRECT_THIS_LINE += 1
         OCCUR_TO_LABEL[letter] += 1
-    ## Step through 2/2 times to format letters
+    // Step through 2/2 times to format letters
     for i in range(0,5):
         letter = guess[i]
         if PICK_LETTER_COUNT[letter] > 0:
