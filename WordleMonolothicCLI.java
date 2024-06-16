@@ -239,7 +239,7 @@ private static pick_word(WORD_ARRAY) {
     int rand_pick = rand.nextInt(wordcount);
     picked_word = WORD_ARRAY.get(rand_pick);
     init_pick_tracking();
-    return picked_word
+    return picked_word;
 }
     
 def init_pick_tracking():
