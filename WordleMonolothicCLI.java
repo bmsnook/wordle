@@ -1,9 +1,8 @@
 // Python imports
-import os
-import re
-import random
-import string
-## 
+//import os
+//import re
+//import random
+//import string
 // Java imports
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -225,12 +224,21 @@ def print_options():
 def clear():
 	os.system(CLEAR)
 
-def pick_word(WORD_ARRAY):
-	wordcount = len(WORD_ARRAY)
-	rand_pick = random.randint(0, wordcount-1)
-	picked_word = WORD_ARRAY[rand_pick]
-	init_pick_tracking()
+//def pick_word(WORD_ARRAY):
+//	wordcount = len(WORD_ARRAY)
+//	rand_pick = random.randint(0, wordcount-1)
+//	picked_word = WORD_ARRAY[rand_pick]
+//	init_pick_tracking()
+//	return picked_word
+	
+private static pick_word(WORD_ARRAY) {
+	wordcount = WORD_ARRAY.size();
+	Random rand = new Random();
+	int rand_pick = rand.nextInt(wordcount);
+	picked_word = WORD_ARRAY.get(rand_pick);
+	init_pick_tracking();
 	return picked_word
+}
 	
 def init_pick_tracking():
 	NUM_GUESSES=0
