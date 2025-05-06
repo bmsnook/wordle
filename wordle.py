@@ -387,7 +387,7 @@ def guess_line_array_to_string(array):
 	return(gstring)
 
 def add_guess_line_to_board(line_string, guess_number):
-	global ALL_GUESS_FORMATTED
+	global ALL_GUESSES_FORMATTED
 	ALL_GUESSES_FORMATTED[guess_number] = line_string
 
 def correct_tag(letter):
