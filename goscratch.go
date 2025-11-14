@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -17,6 +19,22 @@ func main() {
 	// Write some data to the temporary file
 	data := []byte("Hello, World!")
 	if _, err := tmpFile.Write(data); err != nil {
+		fmt.Println("Error writing to temp file:", err)
+		return
+	}
+
+	// Prompt the user for input
+	fmt.Print("Enter some text: ")
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Println("Error reading input:", err)
+		return
+	}
+
+	// Write user input to the temporary file
+	_, err = tmpFile.WriteString(strings.TrimSpace(input))
+	if err != nil {
 		fmt.Println("Error writing to temp file:", err)
 		return
 	}
