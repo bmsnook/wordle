@@ -68,29 +68,62 @@ var BASIC_TAG_DELIM string = " "
 var BLANK_TAG_DELIM string = " "
 
 func import_validwords(WFILE string) {
-	
-	with open(WFILE, 'r') as f:
-		for line in f:
-			word = line.rstrip()
+	file, err := os.Open(WFILE)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening file %s: %v\n", WFILE, err)
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		word := strings.TrimSpace(scanner.Text())
+		if word != "" {
 			VALID_COUNT += 1
-			VALID_WORDS.append(word)
-	f.close()
+			VALID_WORDS = append(VALID_WORDS, word)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading file %s: %v\n", WFILE, err)
+	}
 }
 
 func import_wordlist(WFILE string) {
-	global WCOUNT
-	global VALID_COUNT
-	global VALID_BONUS_COUNT
-	with open(WFILE, 'r') as f:
-		for line in f:
+	file, err := os.Open(WFILE)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening file %s: %v\n", WFILE, err)
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		word := strings.TrimSpace(scanner.Text())
+		if word != "" {
 			WCOUNT += 1
-			word = line.rstrip()
-			WORDS.append(word)
-			if word not in VALID_WORDS:
+			WORDS = append(WORDS, word)
+			
+			// Check if word is not already in VALID_WORDS
+			found := false
+			for _, validWord := range VALID_WORDS {
+				if validWord == word {
+					found = true
+					break
+				}
+			}
+			
+			if !found {
 				VALID_COUNT += 1
 				VALID_BONUS_COUNT += 1
-				VALID_WORDS.append(word)
-	f.close()
+				VALID_WORDS = append(VALID_WORDS, word)
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading file %s: %v\n", WFILE, err)
+	}
 }
 
 func get_term_width() {
