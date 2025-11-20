@@ -227,9 +227,9 @@ def init_pick_tracking():
 	NUM_GUESSES=0
 	current_guess_array = {}
 	for letter in string.ascii_lowercase:
-		CORRECT_ARRAY[letter] = 0
-		MISPLACED_ARRAY[letter] = 0
-		WRONG_ARRAY[letter] = 0
+		CORRECT_ARRAY[letter] = False
+		MISPLACED_ARRAY[letter] = False
+		WRONG_ARRAY[letter] = False
 		PICK_LETTER_COUNT[letter] = 0
 	for i in range(0,6):
 		for j in range(0,5):
@@ -417,19 +417,19 @@ def blank_tag():
 
 def mark_correct(letter):
 	global CORRECT_ARRAY
-	CORRECT_ARRAY[letter] = 1
+	CORRECT_ARRAY[letter] = True
 
 def mark_misplaced(letter):
 	global MISPLACED_ARRAY
-	MISPLACED_ARRAY[letter] = 1
+	MISPLACED_ARRAY[letter] = True
 
 def unmark_misplaced(letter):
 	global MISPLACED_ARRAY
-	MISPLACED_ARRAY[letter] = 0
+	MISPLACED_ARRAY[letter] = False
 
 def mark_wrong(letter):
 	global WRONG_ARRAY
-	WRONG_ARRAY[letter] = 1
+	WRONG_ARRAY[letter] = True
 
 def register_pick(pick):
 	global PICK_LETTER_COUNT
