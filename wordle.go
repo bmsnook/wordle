@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"golang.org/x/term"
 )
 
 var CLEAR string = "clear"
 
 var WORD_LIST_FILE string = "wordle-PLAY.txt"
 var VALID_WORDLIST string = "wordle-VALID.txt"
+var DEFAULT_WIDTH int = 80
 
 var VALID_WORDS []string = []string{}
 var WORDS []string = []string{}
@@ -126,19 +128,22 @@ func import_wordlist(WFILE string) {
 	}
 }
 
-func get_term_width() {
-
-	verify_tput_cmd := fmt.Sprintf("[ -x %s ]", TPUT)
-	tput_found_stat := system(verify_tput_cmd)
-	close(verify_tput_cmd)
-	if tput_found_stat == 0 {
-		cmd_cols := fmt.Sprintf("%s cols", TPUT)
-		cmd_cols | getline WIDTH
-		close(cmd_cols)
-	} else {
-		WIDTH = 80
+func get_term_width() int {
+	fd := int(os.Stdout.Fd())
+	// Check if the terminal is a TTY
+	if !term.IsTerminal(fd) {
+		// fmt.Println("Not a terminal")
+		// return
+		width = DEFAULT_WIDTH
 	}
-	return WIDTH
+	// Get the terminal size
+	width, height, err := term.GetSize(fd)
+	if err != nil {
+		// fmt.Println("Error getting terminal size:", err)
+		// return
+		width = DEFAULT_WIDTH
+	}
+	return width
 }
 
 func print_left_justified(array_of_lines []string) {
