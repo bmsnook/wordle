@@ -178,9 +178,9 @@ def map_letters(letter_array):
 
 def print_letters():
 	if USE_KEYBOARD:
-		LETTER_FORMAT = map_letters(KEYBOARD)
+		map_letters(KEYBOARD)
 	else:
-		LETTER_FORMAT = map_letters(ALPHABET)
+		map_letters(ALPHABET)
 	if CENTER:
 		print_centered(LETTER_STATUS)
 	else:
