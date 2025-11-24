@@ -274,3 +274,5 @@ xmloutput*
 .ipynb_checkpoints
 *.tsbuildinfo
 
+## Compiled Go binary
+wordle
