@@ -1,10 +1,16 @@
-package wordle
+package main
 
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
+	"os/exec"
+	"regexp"
+	"slices"
 	"strings"
+	"time"
+
 	"golang.org/x/term"
 )
 
@@ -17,19 +23,22 @@ var DEFAULT_WIDTH int = 80
 var VALID_WORDS []string = []string{}
 var WORDS []string = []string{}
 var USAGE_TEXT []string = []string{"NOTE: misplaced # reflects occurrences; extras are marked wrong"}
-var SOLVED_MOVES map[string]int = map[string]int{}
+var SOLVED_MOVES map[int]int = map[int]int{}
 var COUNT_LINE_GUESS map[string]int = map[string]int{}
 var PICK_LETTER_COUNT map[string]int = map[string]int{}
-var CORRECT_ARRAY map[string]int = map[string]int{}
-var MISPLACED_ARRAY map[string]int = map[string]int{}
-var WRONG_ARRAY map[string]int = map[string]int{}
-var LETTER_STATUS map[string]int = map[string]int{}
-var CURRENT_GUESS_ARRAY map[string]int = map[string]int{}
+var CORRECT_ARRAY map[string]bool = map[string]bool{}
+var MISPLACED_ARRAY map[string]bool = map[string]bool{}
+var WRONG_ARRAY map[string]bool = map[string]bool{}
+
+// var LETTER_STATUS map[string]int = map[string]int{}
+// var LETTER_STATUS map[int]string = map[int]string{}
+var LETTER_STATUS []string = []string{}
+var CURRENT_GUESS_ARRAY map[int]string = map[int]string{}
 var CORRECT_TO_LABEL map[string]int = map[string]int{}
 var OCCUR_TO_LABEL map[string]int = map[string]int{}
 var LABELED_MISPLACED map[string]int = map[string]int{}
-var ALL_GUESSES_FORMATTED map[string]int = map[string]int{}
-var SOLVED_RATIO map[string]int = map[string]int{}
+var ALL_GUESSES_FORMATTED []string = []string{}
+var SOLVED_RATIO map[int]float32 = map[int]float32{}
 
 var VALID_COUNT int = 0
 var WCOUNT int = 0
@@ -69,6 +78,8 @@ var WRONG_TAG_DELIM string = "*"
 var BASIC_TAG_DELIM string = " "
 var BLANK_TAG_DELIM string = " "
 
+var CURRENT_WORD string = ""
+
 func import_validwords(WFILE string) {
 	file, err := os.Open(WFILE)
 	if err != nil {
@@ -105,7 +116,7 @@ func import_wordlist(WFILE string) {
 		if word != "" {
 			WCOUNT += 1
 			WORDS = append(WORDS, word)
-			
+
 			// Check if word is not already in VALID_WORDS
 			found := false
 			for _, validWord := range VALID_WORDS {
@@ -114,7 +125,7 @@ func import_wordlist(WFILE string) {
 					break
 				}
 			}
-			
+
 			if !found {
 				VALID_COUNT += 1
 				VALID_BONUS_COUNT += 1
@@ -129,6 +140,7 @@ func import_wordlist(WFILE string) {
 }
 
 func get_term_width() int {
+	width := DEFAULT_WIDTH
 	fd := int(os.Stdout.Fd())
 	// Check if the terminal is a TTY
 	if !term.IsTerminal(fd) {
@@ -138,6 +150,7 @@ func get_term_width() int {
 	}
 	// Get the terminal size
 	width, height, err := term.GetSize(fd)
+	_ = height
 	if err != nil {
 		// fmt.Println("Error getting terminal size:", err)
 		// return
@@ -209,26 +222,27 @@ func formatted_letter(letter string) string {
 	}
 }
 
-func map_letters(letter_array []string) []string {
+// func map_letters(letter_array []string) []string {
+func map_letters(letter_array []string) {
 	for i := 0; i < len(letter_array); i++ {
 		line := ""
 		num_per_line := strings.Split(letter_array[i], "")
-		for j := 0; j < len(num_per_line) - 1; j++ {
+		for j := 0; j < len(num_per_line)-1; j++ {
 			val := formatted_letter(num_per_line[j])
 			line = line + KEY_LD + val + KEY_RD + KSEP
 		}
-		val := formatted_letter(num_per_line[len(num_per_line) - 1])
+		val := formatted_letter(num_per_line[len(num_per_line)-1])
 		line = line + KEY_LD + val + KEY_RD
 		LETTER_STATUS[i] = line
 	}
-	return LETTER_STATUS
+	// return LETTER_STATUS
 }
 
 func print_letters() {
 	if USE_KEYBOARD {
-		LETTER_FORMAT = map_letters(KEYBOARD)
+		map_letters(KEYBOARD)
 	} else {
-		LETTER_FORMAT = map_letters(ALPHABET)
+		map_letters(ALPHABET)
 	}
 	if CENTER {
 		print_centered(LETTER_STATUS)
@@ -266,17 +280,10 @@ func print_options() {
 }
 
 func clear() {
-	os.Command("clear").Run()
-}
-
-func init_seed() {
-	cmd := exec.Command("echo", "$RANDOM")
-	cmd.Stdout = os.Stdout
-	cmd.Run()
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
+	// os.Command(CLEAR).Run()
+	clear_cmd := exec.Command(CLEAR)
+	clear_cmd.Stdout = os.Stdout
+	clear_cmd.Run()
 }
 
 func pick_word(ENUM_LIST_ARRAY []string) string {
@@ -290,46 +297,48 @@ func pick_word(ENUM_LIST_ARRAY []string) string {
 
 func init_pick_tracking() {
 	NUM_GUESSES = 0
-	for letter := range "abcdefghijklmnopqrstuvwxyz" {
-		CORRECT_ARRAY[letter] = 0
-		MISPLACED_ARRAY[letter] = 0
-		WRONG_ARRAY[letter] = 0
+	// for letter := range "abcdefghijklmnopqrstuvwxyz" {
+	for c := 'a'; c <= 'z'; c++ {
+		letter := string(c)
+		CORRECT_ARRAY[letter] = false
+		MISPLACED_ARRAY[letter] = false
+		WRONG_ARRAY[letter] = false
 		PICK_LETTER_COUNT[letter] = 0
 	}
 }
 
 func init_stats() {
-	global GAMES_PLAYED
-	global GAMES_SOLVED
-	global SOLVED_MOVES
-	global SOLVED_RATIO
 	GAMES_PLAYED = 0
 	GAMES_SOLVED = 0
+	for i := 1; i <= 6; i++ {
+		SOLVED_MOVES[i] = 0
+		SOLVED_RATIO[i] = 0.0
+	}
 }
 
 func register_solution() {
-	global SOLVED
-	global GAMES_SOLVED
-	global SOLVED_MOVES
 	if SOLVED {
 		GAMES_SOLVED += 1
 		SOLVED_MOVES[NUM_GUESSES] += 1
 	}
-	for i := 0; i < 6; i++ {
-		for j := 0; j < 5; j++ {
-			CURRENT_GUESS_ARRAY[j] = blank_tag()
-		}
-		current_guess_string := guess_line_array_to_string(CURRENT_GUESS_ARRAY)
-		add_guess_line_to_board(current_guess_string, i)
-	}
 }
 
 func print_stats() {
-	fmt.Println("STATS:")
-	fmt.Println("  Games played:", GAMES_PLAYED)
-	fmt.Println("  Games solved:", GAMES_SOLVED)
-	fmt.Println("  Solved moves:", SOLVED_MOVES)
-	fmt.Println("  Solved ratio:", SOLVED_RATIO)
+	ratio := float32(0.0)
+	// fmt.Println("Games Played: {:6}      Games Solved: {:6}      ({:.2f} %)".format(
+	// 	GAMES_PLAYED, GAMES_SOLVED, (GAMES_SOLVED/GAMES_PLAYED)*100))
+	fmt.Printf("Games Played: %6d      Games Solved: %6d      (%.2f %%)\n", GAMES_PLAYED, GAMES_SOLVED, (GAMES_SOLVED/GAMES_PLAYED)*100)
+	for i := 1; i <= 6; i++ {
+		if GAMES_SOLVED == 0 {
+			ratio = float32(0.0)
+		} else {
+			ratio = float32((SOLVED_MOVES[i] / GAMES_SOLVED) * 100)
+		}
+		SOLVED_RATIO[i] = ratio
+		fmt.Printf("%d:%d (%.1f%%)  ", i, SOLVED_MOVES[i], ratio)
+	}
+	fmt.Println()
+	fmt.Println()
 }
 
 func init_this_guess_tracking() {
@@ -337,10 +346,19 @@ func init_this_guess_tracking() {
 	for i := 0; i < 5; i++ {
 		CURRENT_GUESS_ARRAY[i] = blank_tag()
 	}
+	// for letter := range "abcdefghijklmnopqrstuvwxyz" {
+	for c := 'a'; c <= 'z'; c++ {
+		letter := string(c)
+		CORRECT_TO_LABEL[letter] = 0
+		OCCUR_TO_LABEL[letter] = 0
+		LABELED_MISPLACED[letter] = 0
+	}
 }
 
 func init_letters_in_current_guess() {
-	for letter := range "abcdefghijklmnopqrstuvwxyz" {
+	// for letter := range "abcdefghijklmnopqrstuvwxyz" {
+	for c := 'a'; c <= 'z'; c++ {
+		letter := string(c)
 		COUNT_LINE_GUESS[letter] = 0
 	}
 }
@@ -433,7 +451,7 @@ func disable_playing() {
 
 func guess_line_array_to_string(guess_line_array []string) string {
 	guess_string := ""
-	for i := 0; i < len(guess_line_array) - 1; i++ {
+	for i := 0; i < len(guess_line_array)-1; i++ {
 		guess_string += guess_line_array[i] + GSEP + GUESS_LD + guess_line_array[i] + GUESS_RD
 	}
 	// guess_string += guess_line_array[len(guess_line_array) - 1] + GSEP + GUESS_LD + guess_line_array[len(guess_line_array) - 1] + GUESS_RD
@@ -461,72 +479,82 @@ func basic_tag(letter string) string {
 }
 
 func blank_tag() string {
-	return BLANK_TAG_DELIM + BLANK_TAG_DELIM
+	return BLANK_TAG_DELIM + " " + BLANK_TAG_DELIM
 }
 
 func mark_correct(letter string) {
-	CORRECT_ARRAY[letter] = 1
+	CORRECT_ARRAY[letter] = true
 }
 
 func mark_misplaced(letter string) {
-	MISPLACED_ARRAY[letter] = 1
+	MISPLACED_ARRAY[letter] = true
 }
 
 func unmark_misplaced(letter string) {
-	MISPLACED_ARRAY[letter] = 0
+	MISPLACED_ARRAY[letter] = false
 }
 
 func mark_wrong(letter string) {
-	WRONG_ARRAY[letter] = 1
+	WRONG_ARRAY[letter] = true
 }
 
 func register_pick(pick string) {
 	NUM_GUESSES = 0
-	split(pick, pick_as_array, "")
-	for i := 0; i < len(pick_as_array); i++ {
-		PICK_LETTER_COUNT[pick_as_array[i]] += 1
+	// split(pick, pick_as_array, "")
+	pick_as_array := strings.Split(pick, "")
+	for _, letter := range pick_as_array {
+		PICK_LETTER_COUNT[letter] += 1
 	}
 }
 
 func evaluate_guess(guess string) int {
-	if guess not in VALID_WORDS {
+	current_guess_line_array := make([]string, 5)
+	for i := 0; i < 5; i++ {
+		current_guess_line_array[i] = blank_tag()
+	}
+	if !slices.Contains(VALID_WORDS, guess) {
 		return 0
 	}
 	init_this_guess_tracking()
+	// Step through 1/2 times to count matches
 	for i := 0; i < 5; i++ {
-		letter := guess[i]
+		// letter := guess[i]
+		letter := string(guess[i])
 		COUNT_LINE_GUESS[letter] += 1
-		if CURRENT_WORD[i] == letter {
+		if string(CURRENT_WORD[i]) == letter {
 			CORRECT_TO_LABEL[letter] += 1
 			CORRECT_THIS_LINE += 1
 		}
 		OCCUR_TO_LABEL[letter] += 1
 	}
+	// Step through 2/2 times to format letters
 	for i := 0; i < 5; i++ {
-		letter := guess[i]
+		// letter := guess[i]
+		letter := string(guess[i])
 		if PICK_LETTER_COUNT[letter] > 0 {
-			if CURRENT_WORD[i] == letter {
+			if string(CURRENT_WORD[i]) == letter {
 				mark_correct(letter)
 				unmark_misplaced(letter)
-				CURRENT_GUESS_ARRAY[i] = correct_tag(letter)
+				current_guess_line_array[i] = correct_tag(letter)
 			} else if (LABELED_MISPLACED[letter] + CORRECT_TO_LABEL[letter] + 1) <= PICK_LETTER_COUNT[letter] {
 				mark_misplaced(letter)
-				CURRENT_GUESS_ARRAY[i] = misplaced_tag(letter)
+				current_guess_line_array[i] = misplaced_tag(letter)
 				LABELED_MISPLACED[letter] += 1
 				enable_usage()
 			} else {
-				CURRENT_GUESS_ARRAY[i] = wrong_tag(letter)
+				current_guess_line_array[i] = wrong_tag(letter)
 			}
 		} else {
 			mark_wrong(letter)
-			CURRENT_GUESS_ARRAY[i] = wrong_tag(letter)
+			current_guess_line_array[i] = wrong_tag(letter)
 		}
 	}
-	current_guess_string := guess_line_array_to_string(CURRENT_GUESS_ARRAY)
+	current_guess_string := guess_line_array_to_string(current_guess_line_array)
 	add_guess_line_to_board(current_guess_string, NUM_GUESSES)
 	if CORRECT_THIS_LINE == 5 {
 		enable_set_solved()
 	}
+	NUM_GUESSES += 1
 	return 1
 }
 
@@ -575,33 +603,62 @@ func prompt_user() string {
 }
 
 func process_response(this string) {
+	if DEBUG {
+		fmt.Println("DEBUG: (process_response): response == '", this, "'")
+	}
+	looksLikeOption := regexp.MustCompile("^[1-9]$")
+	looksLikeWord := regexp.MustCompile("^[a-z][a-z][a-z][a-z][a-z]$")
 	if this == "0" {
 		disable_playing()
+		if DEBUG1 {
+			fmt.Println("DEBUG: (process_response): input = '", this, "'")
+			fmt.Println("DEBUG: (process_response): PLAYING = '", PLAYING, "'")
+		}
+		return
+	} else if looksLikeOption.MatchString(this) {
+		// set_options(strconv.Atoi(this))
+		set_options(int(this[0]))
+		return
+	} else if looksLikeWord.MatchString(this) {
+		evaluate_guess(this)
 		return
 	} else if this == "?" {
 		enable_options()
 		disable_guide()
-	} else if this ~ /[a-z][a-z][a-z][a-z][a-z]/ {
-		evaluate_guess(this)
+		return
 	}
+	return
 }
 
 func process_final(this string) {
+	if DEBUG {
+		fmt.Println("DEBUG: (process_final): response == '", this, "'")
+	}
+	looksLikeOption := regexp.MustCompile("^[1-9]$")
+	looksLikeWord := regexp.MustCompile("^[a-z][a-z][a-z][a-z][a-z]$")
 	if this == "0" {
 		disable_playing()
+		return
+	} else if looksLikeOption.MatchString(this) {
+		set_options(int(this[0]))
+		return
+	} else if looksLikeWord.MatchString(this) {
+		evaluate_guess(this)
 		return
 	} else if this == "?" {
 		enable_options()
 		disable_guide()
+		return
 	}
+	return
 }
 
 func main() {
-	init_seed()
+	// init_seed()
 	import_validwords(VALID_WORDLIST)
 	import_wordlist(WORD_LIST_FILE)
 	init_stats()
-	while PLAYING {
+	for PLAYING {
 		init_letters_in_current_guess()
 		disable_usage()
 		CURRENT_WORD = pick_word(WORDS)
@@ -609,28 +666,28 @@ func main() {
 			fmt.Println("Picked word:", CURRENT_WORD)
 		}
 		register_pick(CURRENT_WORD)
-	}
-	while ( PLAYING and (NUM_GUESSES < 6) and not SOLVED ) {
-		print_board()
-		process_response(prompt_user().lower())
-	}
-	GAMES_PLAYED += 1
-	if SOLVED {
-		register_solution()
-		disable_guide()
-		print_board()
-		print_stats()
-		fmt.Println("Congratulations for solving:", CURRENT_WORD)
-	}
-	if NUM_GUESSES == 6 {
-		disable_guide()
-		print_board()
-		fmt.Println("Puzzle not solved in 6 guesses. Reveal word [N|y]? ")
-		fmt.Scanln(&response)
-		if response == "y" {
-			fmt.Println("The word was:", CURRENT_WORD)
+		for PLAYING && (NUM_GUESSES < 6) && !SOLVED {
+			print_board()
+			process_response(strings.ToLower(prompt_user()))
 		}
+		GAMES_PLAYED += 1
+		if SOLVED {
+			register_solution()
+			disable_guide()
+			print_board()
+			print_stats()
+			fmt.Println("Congratulations for solving: '", CURRENT_WORD, "'. Play again?")
+		} else if NUM_GUESSES == 6 {
+			disable_guide()
+			print_board()
+			fmt.Println("Puzzle not solved in 6 guesses. Reveal word [N|y]? ")
+			var response string
+			fmt.Scanln(&response)
+			if strings.ToLower(response) == "y" {
+				fmt.Println("The word was: '", CURRENT_WORD, "'. Play again?")
+			}
+		}
+		enable_guide()
+		process_final(strings.ToLower(prompt_user()))
 	}
-	enable_guide()
-	process_final(prompt_user().lower())
 }
