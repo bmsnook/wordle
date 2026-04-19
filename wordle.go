@@ -338,14 +338,12 @@ func register_solution() {
 
 func print_stats() {
 	ratio := float32(0.0)
-	// fmt.Println("Games Played: {:6}      Games Solved: {:6}      ({:.2f} %)".format(
-	// 	GAMES_PLAYED, GAMES_SOLVED, (GAMES_SOLVED/GAMES_PLAYED)*100))
-	fmt.Printf("Games Played: %6d      Games Solved: %6d      (%.2f %%)\n", GAMES_PLAYED, GAMES_SOLVED, (GAMES_SOLVED/GAMES_PLAYED)*100)
+	fmt.Printf("Games Played: %6d      Games Solved: %6d      (%.2f %%)\n", GAMES_PLAYED, GAMES_SOLVED, float32(GAMES_SOLVED)/float32(GAMES_PLAYED)*100)
 	for i := 1; i <= 6; i++ {
 		if GAMES_SOLVED == 0 {
 			ratio = float32(0.0)
 		} else {
-			ratio = float32((SOLVED_MOVES[i] / GAMES_SOLVED) * 100)
+			ratio = float32(SOLVED_MOVES[i]) / float32(GAMES_SOLVED) * 100
 		}
 		SOLVED_RATIO[i] = ratio
 		fmt.Printf("%d:%d (%.1f%%)  ", i, SOLVED_MOVES[i], ratio)
