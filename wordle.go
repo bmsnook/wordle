@@ -258,10 +258,10 @@ func print_title() {
 
 func print_guide() {
 	fmt.Println("GUIDE:")
-	fmt.Println("  [", CORRECT_TAG_DELIM, "]  ==  CORRECT letter")
-	fmt.Println("  [", MISPLACED_TAG_DELIM, "]  ==  Misplaced letter (elsewhere in puzzle)")
-	fmt.Println("  [", WRONG_TAG_DELIM, "]  ==  Wrong letter (not in puzzle)")
-	fmt.Println("  [", BASIC_TAG_DELIM, "]  ==  Untried letter")
+	fmt.Println("  [" + correct_tag("a") + "]  ==  CORRECT letter")
+	fmt.Println("  [" + misplaced_tag("a") + "]  ==  Misplaced letter (elsewhere in puzzle)")
+	fmt.Println("  [" + wrong_tag("a") + "]  ==  Wrong letter (not in puzzle)")
+	fmt.Println("  [" + basic_tag("a") + "]  ==  Untried letter")
 	fmt.Println()
 }
 
@@ -300,6 +300,16 @@ func init_pick_tracking() {
 	NUM_GUESSES = 0
 	SOLVED = false
 	ALL_GUESSES_FORMATTED = make([]string, 6)
+	for i := 0; i < 6; i++ {
+		guess_string := ""
+		for j := 0; j < 5; j++ {
+			guess_string += GUESS_LD + blank_tag() + GUESS_RD
+			if j < 4 {
+				guess_string += GSEP
+			}
+		}
+		ALL_GUESSES_FORMATTED[i] = guess_string
+	}
 	// for letter := range "abcdefghijklmnopqrstuvwxyz" {
 	for c := 'a'; c <= 'z'; c++ {
 		letter := string(c)
@@ -454,10 +464,12 @@ func disable_playing() {
 
 func guess_line_array_to_string(guess_line_array []string) string {
 	guess_string := ""
-	for i := 0; i < len(guess_line_array)-1; i++ {
-		guess_string += guess_line_array[i] + GSEP + GUESS_LD + guess_line_array[i] + GUESS_RD
+	for i := 0; i < len(guess_line_array); i++ {
+		guess_string += GUESS_LD + guess_line_array[i] + GUESS_RD
+		if i < len(guess_line_array)-1 {
+			guess_string += GSEP
+		}
 	}
-	// guess_string += guess_line_array[len(guess_line_array) - 1] + GSEP + GUESS_LD + guess_line_array[len(guess_line_array) - 1] + GUESS_RD
 	return guess_string
 }
 
@@ -691,6 +703,8 @@ func main() {
 			}
 		}
 		enable_guide()
-		process_final(strings.ToLower(prompt_user()))
+		if PLAYING {
+			process_final(strings.ToLower(prompt_user()))
+		}
 	}
 }
