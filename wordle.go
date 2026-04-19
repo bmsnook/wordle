@@ -172,7 +172,7 @@ func print_left_justified(array_of_lines []string) {
 	SZ := int(WD / max_line_length)
 	for i := 0; i < NL; i++ {
 		for j := 0; j < len(array_of_lines[i]); j++ {
-			fmt.Printf("%-*s", SZ, array_of_lines[i][j])
+			fmt.Printf("%-*c", SZ, array_of_lines[i][j])
 		}
 		fmt.Println()
 	}
@@ -224,6 +224,7 @@ func formatted_letter(letter string) string {
 
 // func map_letters(letter_array []string) []string {
 func map_letters(letter_array []string) {
+	LETTER_STATUS = make([]string, len(letter_array))
 	for i := 0; i < len(letter_array); i++ {
 		line := ""
 		num_per_line := strings.Split(letter_array[i], "")
@@ -297,6 +298,8 @@ func pick_word(ENUM_LIST_ARRAY []string) string {
 
 func init_pick_tracking() {
 	NUM_GUESSES = 0
+	SOLVED = false
+	ALL_GUESSES_FORMATTED = make([]string, 6)
 	// for letter := range "abcdefghijklmnopqrstuvwxyz" {
 	for c := 'a'; c <= 'z'; c++ {
 		letter := string(c)
