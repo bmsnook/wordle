@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"slices"
 	"strings"
 	"time"
@@ -278,6 +279,8 @@ func print_options() {
 	fmt.Println("  8 == Toggle centered and justified display")
 	fmt.Println("  9 == Toggle DEBUG mode (caution: reveals word pick)")
 	fmt.Println()
+	disable_options()
+	enable_guide()
 }
 
 func clear() {
@@ -629,8 +632,9 @@ func process_response(this string) {
 		}
 		return
 	} else if looksLikeOption.MatchString(this) {
-		// set_options(strconv.Atoi(this))
-		set_options(int(this[0]))
+		if n, err := strconv.Atoi(this); err == nil {
+			set_options(n)
+		}
 		return
 	} else if looksLikeWord.MatchString(this) {
 		evaluate_guess(this)
@@ -652,7 +656,9 @@ func process_final(this string) {
 		disable_playing()
 		return
 	} else if looksLikeOption.MatchString(this) {
-		set_options(int(this[0]))
+		if n, err := strconv.Atoi(this); err == nil {
+			set_options(n)
+		}
 		return
 	} else if this == "?" {
 		enable_options()
