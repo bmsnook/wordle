@@ -609,7 +609,7 @@ func print_board() {
 }
 
 func prompt_user() string {
-	fmt.Println("Enter text, ? for options, or 0 to quit: ")
+	fmt.Print("Enter text, ? for options, or 0 to quit: ")
 	var response string
 	fmt.Scanln(&response)
 	return response
@@ -648,21 +648,18 @@ func process_final(this string) {
 		fmt.Println("DEBUG: (process_final): response == '", this, "'")
 	}
 	looksLikeOption := regexp.MustCompile("^[1-9]$")
-	looksLikeWord := regexp.MustCompile("^[a-z][a-z][a-z][a-z][a-z]$")
 	if this == "0" {
 		disable_playing()
 		return
 	} else if looksLikeOption.MatchString(this) {
 		set_options(int(this[0]))
 		return
-	} else if looksLikeWord.MatchString(this) {
-		evaluate_guess(this)
-		return
 	} else if this == "?" {
 		enable_options()
 		disable_guide()
 		return
 	}
+	// Any non-zero input continues to a new game
 	return
 }
 
